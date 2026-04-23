@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>VRP ACO</title>
+    <link rel="stylesheet" href="style.css" />
+
+    <!-- Font -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans&family=JetBrains+Mono&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  </head>
+  <body>
+    <!-- HEADER -->
+    <header class="header">
+      <div class="logo">
+        <div class="icon">📍</div>
+        <div>
+          <h1>VRP ACO</h1>
+          <p>Vehicle Routing Problem • Ant Colony Optimization</p>
+        </div>
+      </div>
+      <div class="version">v2.0.1</div>
+    </header>
+
+    <div class="container">
+      <!-- SIDEBAR -->
+      <aside class="sidebar">
+        <!-- TAB -->
+        <div class="tabs">
+          <button class="active" onclick="switchTab(event, 'kho')">Kho</button>
+          <button onclick="switchTab(event, 'khach')">Khách</button>
+          <button onclick="switchTab(event, 'xe')">Xe</button>
+        </div>
+
+        <!-- KHO -->
+        <div id="khoTab" class="tab-content">
+          <div id="khoList"></div>
+          <button class="add-btn" onclick="addKho()">+ Thêm kho</button>
+        </div>
+
+        <!-- KHÁCH -->
+        <div id="khachTab" class="tab-content hidden">
+          <div id="customerList"></div>
+          <button class="add-btn" onclick="addCustomer()">+ Thêm khách</button>
+        </div>
+
+        <!-- XE -->
+        <div id="xeTab" class="tab-content hidden">
+          <div id="vehicleListUI"></div>
+          <button class="add-btn" onclick="addVehicle()">+ Thêm xe</button>
+        </div>
+      </aside>
+
+      <!-- MAIN -->
+      <main class="main">
+        <!-- CONTROL -->
+        <section class="control">
+          <h2>ĐIỀU KHIỂN</h2>
+
+          <div class="buttons">
+            <button class="primary" onclick="runACO()">ACO Exact</button>
+            <button onclick="autoGenerateCustomers()">Cho khách</button>
+            <button onclick="splitDepot()">Chia kho</button>
+            <button onclick="splitVehicles()">Chia xe</button>
+            <button onclick="resetAll()">Phục hồi</button>
+            <button onclick="exportCSV()">Export</button>
+          </div>
+
+          <div class="aco-box">
+            <div class="aco-item">
+              <span>α (alpha)</span>
+              <input id="alpha" value="1.0" />
+            </div>
+
+            <div class="aco-item">
+              <span>β (beta)</span>
+              <input id="beta" value="2.0" />
+            </div>
+
+            <div class="aco-item">
+              <span>ρ (rho)</span>
+              <input id="rho" value="0.5" />
+            </div>
+          </div>
+        </section>
+
+        <!-- RESULT -->
+        <section class="panel">
+          <h2>KẾT QUẢ TỐI ƯU</h2>
+
+          <!-- STATS -->
+          <div class="stats">
+            <div class="stat-box">
+              🚚 <b id="totalVehicles">3</b><br />
+              <span>Tổng xe</span>
+            </div>
+
+            <div class="stat-box">
+              📦 <b id="totalOrders">15</b><br />
+              <span>Tổng đơn</span>
+            </div>
+
+            <div class="stat-box">
+              ⏱ <b id="totalTime">7h 30m</b><br />
+              <span>Thời gian</span>
+            </div>
+          </div>
+
+          <!-- TABLE -->
+          <table>
+            <thead>
+              <tr>
+                <th>Xe</th>
+                <th>Số đơn</th>
+                <th>Thời gian</th>
+                <th>Tải trọng</th>
+                <th>Quãng đường</th>
+              </tr>
+            </thead>
+            <tbody id="resultTable"></tbody>
+          </table>
+        </section>
+        <h2>Bản đồ:</h2>
+        <div id="map" style="height: 400px; margin-top: 20px"></div>
+      </main>
+    </div>
+  </body>
+</html>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="app.js"></script>
