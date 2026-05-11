@@ -3,13 +3,6 @@ let markers = [];
 let allCustomers = [];
 let vehicleList = [];
 
-let depot = {
-    id: 0,
-    name: "Depot",
-    lat: 21.028,
-    lng: 105.834
-};
-
 let pheromone = {};
 let polylines = [];
 
@@ -17,6 +10,26 @@ let polylines = [];
 let alpha = 1;
 let beta = 2;
 let rho = 0.5;
+
+// ================= ĐỊA CHỈ Kho =================
+function getDepot() {
+
+    let kho = document.querySelector("#khoList .card");
+
+    if (!kho) {
+        alert("Chưa có kho!");
+        return null;
+    }
+
+    let inputs = kho.querySelectorAll("input");
+
+    return {
+        id: 0,
+        name: "Kho",
+        lat: parseFloat(inputs[1].value),
+        lng: parseFloat(inputs[2].value)
+    };
+}
 
 // ================= MAP =================
 const map = L.map('map').setView([21.028, 105.834], 13);
@@ -36,7 +49,6 @@ map.on("click", async function (e) {
         console.log("Lỗi lấy địa chỉ");
     }
 
-    // 👉 check tab hiện tại
     if (!document.getElementById("khoTab").classList.contains("hidden")) {
         addKhoFromMap(lat, lng, address);
     }
@@ -301,8 +313,10 @@ function build() {
 
         let Q = vehicleList[v].capacity;
 
-        let route = [{ ...depot, arrival: 0, load: 0 }];
+        let depot = getDepot();
+        if (!depot) return [];
 
+        let route = [{ ...depot, arrival: 0, load: 0 }];
         let current = depot;
         let load = 0;
         let time = 0;
@@ -368,7 +382,7 @@ function update(routes, c) {
 // ================= DRAW =================
 function draw(routes) {
 
-    // ===== CLEAR CŨ =====
+    // ===== CLEAR =====
     markers.forEach(m => map.removeLayer(m));
     markers = [];
 
@@ -380,31 +394,30 @@ function draw(routes) {
     routes.forEach((r, i) => {
 
         let latlngs = [];
-
+        let seen = new Set();
         r.forEach(p => {
 
             latlngs.push([p.lat, p.lng]);
 
-            // ===== TÊN HIỂN THỊ =====
-            let name = "";
+            let key = p.lat + "," + p.lng;
+            if (seen.has(key)) return;
+            seen.add(key);
 
-            if (p.id === 0) {
-                name = "Kho";
-            } else {
-                name = "KH " + p.id;
-            }
+            let name = p.id === 0 ? "Kho" : "KH " + p.id;
 
-            // ===== TẠO MARKER + TOOLTIP =====
-            let marker = L.marker([p.lat, p.lng])
+            let marker = L.marker([p.lat, p.lng], {
+                icon: L.icon({
+                    iconUrl: p.id === 0
+                        ? "https://maps.google.com/mapfiles/ms/icons/orange-dot.png"
+                        : "https://maps.google.com/mapfiles/ms/icons/blue-dot.png"
+                })
+            })
                 .addTo(map)
-                .bindTooltip(name, {
-                    direction: "top"
-                });
+                .bindTooltip(name, { direction: "top" });
 
-            markers.push(marker); // nếu mày có array markers
+            markers.push(marker);
         });
 
-        // ===== VẼ ĐƯỜNG =====
         let line = L.polyline(latlngs, {
             color: colors[i % colors.length],
             weight: 4
@@ -480,6 +493,14 @@ async function runACO() {
 
     getCustomers();
     getVehicles();
+
+    let depot = getDepot();
+    if (!depot) return;
+    map.setView([depot.lat, depot.lng], 12);
+
+    if (vehicleList.length === 0) {
+    alert("Chưa có xe!");
+    return;}
 
     if (allCustomers.length === 0) {
         alert("Chưa có khách!");
